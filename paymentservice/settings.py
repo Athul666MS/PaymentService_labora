@@ -1,8 +1,39 @@
 import os
+import sys
 from pathlib import Path
+
+import pymysql
+
+pymysql.version_info = (2, 2, 1, "final", 0)
+pymysql.__version__ = "2.2.1"
+pymysql.install_as_MySQLdb()
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
 from datetime import timedelta
 
+from labora_shared.env_config import (
+    load_dotenv_for_service,
+    get_jwt_public_key_path,
+    get_db_config,
+    mysql_databases,
+    read_public_key_pem,
+)
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv_for_service(BASE_DIR)
+
+_cfg = get_db_config()
+DB_HOST = _cfg["DB_HOST"]
+DB_NAME = _cfg["DB_NAME"]
+DB_USER = _cfg["DB_USER"]
+DB_PASSWORD = _cfg["DB_PASSWORD"]
+DB_PORT = _cfg["DB_PORT"]
+
+JWT_PUBLIC_KEY_PATH = get_jwt_public_key_path(BASE_DIR)
 
 # --------------------
 # SECURITY
@@ -11,7 +42,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "super-secret-microservice-key-123")
 
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["*"]   # change in production
+ALLOWED_HOSTS = ["*"]
 
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
@@ -25,7 +56,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     "payment",
     "rest_framework",
     "rest_framework_simplejwt",
@@ -41,7 +71,6 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
-
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -77,13 +106,7 @@ WSGI_APPLICATION = "paymentservice.wsgi.application"
 # --------------------
 # DATABASE
 # --------------------
-# fallback sqlite for dev
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+DATABASES = mysql_databases()
 
 
 # --------------------
@@ -114,7 +137,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # --------------------
-# JWT (SimpleJWT)
+# JWT (RS256, shared auth service keys)
 # --------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -122,8 +145,12 @@ REST_FRAMEWORK = {
     )
 }
 
+JWT_PUBLIC_KEY = read_public_key_pem(JWT_PUBLIC_KEY_PATH)
+PUBLIC_KEY = JWT_PUBLIC_KEY
+
 SIMPLE_JWT = {
-    "SIGNING_KEY": os.getenv("JWT_SIGNING_KEY", "super-secret-microservice-key-123"),
-    "ALGORITHM": os.getenv("JWT_ALGORITHM", "HS256"),
+    "ALGORITHM": "RS256",
+    "VERIFYING_KEY": JWT_PUBLIC_KEY,
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }

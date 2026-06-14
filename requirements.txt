@@ -1,0 +1,10 @@
+Django>=5.1,<6
+djangorestframework>=3.15,<3.17
+django-cors-headers>=4.6,<5
+djangorestframework-simplejwt[crypto]>=5.4,<6
+PyJWT[crypto]>=2.9,<3
+PyMySQL>=1.1,<2
+cryptography>=42,<47
+python-dotenv>=1.0,<2
+razorpay>=1.4,<2
+gunicorn>=23.0,<24
