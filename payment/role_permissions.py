@@ -24,4 +24,4 @@ class IsFreelancer(HasRole):
 
 
 class IsAdmin(HasRole):
-    allowed_roles = ["admin"]
+    allowed_roles = ["labora_admin"]

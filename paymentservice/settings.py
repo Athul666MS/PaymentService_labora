@@ -25,7 +25,9 @@ from labora_shared.env_config import (
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv_for_service(BASE_DIR)
-
+SERVICE_API_KEY = os.getenv(
+    "SERVICE_API_KEY"
+)
 _cfg = get_db_config()
 DB_HOST = _cfg["DB_HOST"]
 DB_NAME = _cfg["DB_NAME"]
@@ -154,3 +156,17 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+# --------------------------------------------------
+# SERVICE URLs
+# --------------------------------------------------
+AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL")
+CLIENT_PROFILE_SERVICE_URL = os.getenv("CLIENT_PROFILE_SERVICE_URL")
+FREELANCER_PROFILE_SERVICE_URL = os.getenv("FREELANCER_PROFILE_SERVICE_URL")
+MESSAGE_SERVICE_URL = os.getenv("MESSAGE_SERVICE_URL")
+JOB_SERVICE_URL = os.getenv("JOB_SERVICE_URL")
+SKILL_SERVICE_URL = os.getenv("SKILL_SERVICE_URL")
+APPLICATION_SERVICE_URL = os.getenv("APPLICATION_SERVICE_URL")
+PAYMENT_SERVICE_URL = os.getenv("PAYMENT_SERVICE_URL")
+REVIEW_SERVICE_URL = os.getenv("REVIEW_SERVICE_URL")
+NOTIFICATION_SERVICE_URL = os.getenv("NOTIFICATION_SERVICE_URL")
